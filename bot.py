@@ -59,7 +59,7 @@ def get_storage(config):
 
 async def main():
     setup_logging()
-
+    await init_db()
     config = load_config(".env")
     storage = get_storage(config)
 
@@ -68,7 +68,7 @@ async def main():
 
     dp.include_routers(*routers_list)
 
-    await init_db()
+
 
     await dp.start_polling(bot)
 

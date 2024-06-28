@@ -25,17 +25,9 @@ class User:
 
         # if await UserWorking.check_user(message.from_user.id):
         #     pass
-        text = TEXTS['start_text']
+        text = TEXTS['start_text'].format(name=message.from_user.username)
         await UserWorking.add_user(user_id=message.from_user.id, name=message.from_user.username)
         await message.answer(text, reply_markup=Profile_kb.start_keyboard())
-
-    @staticmethod
-    @user_router.callback_query(F.data == 'get_rating')
-    async def get_rating(call: CallbackQuery):
-        await call.answer()
-        user = await UserWorking.get_user(call.from_user.id)
-        text = TEXTS['get_rating']
-        await call.message.answer(text)
 
     @staticmethod
     @user_router.callback_query(F.data == 'set_ID')
@@ -66,7 +58,7 @@ class StartGame:
         user = await UserWorking.get_user(call.from_user.id)
         text = TEXTS['start_game']
         await call.message.edit_text(text)
-        if user.game_user_id and user.game_name:
+        if user.game_user_id and user.nickname:
             print(1)
             await call.message.edit_text(text=TEXTS['Текст для запуска игры после заполнения имени и id'])
         else:
@@ -104,7 +96,7 @@ class StartGame:
             await message.answer('инт надо')
         else:
             if await UserWorking.check_game_id(int(message.text)):
-                text = 'Такой id уже есть!'
+                text = TEXTS['такой Id уже есть!']
                 await message.answer(text)
                 await state.set_state(states.set_ID)
                 await message.answer(TEXTS['Текст для ввода ID при запуске игры'])
@@ -113,3 +105,25 @@ class StartGame:
                 await message.answer(TEXTS['После ввода имени и id и запуск игры'],
                                      reply_markup=Profile_kb.start_game_and_play())
                 await state.clear()
+
+
+class User_rating:
+    @staticmethod
+    @user_router.callback_query(F.data == 'get_rating')
+    async def get_rating(call: CallbackQuery):
+        await call.answer()
+        fulltext = """"""
+        todays_rating = TEXTS['сегодняшний рейтинг']
+        fulltext += todays_rating + '\n'
+        list_of_topuser_today = await UserWorking.get_today_rating()
+        list_of_topuser_week = await UserWorking.get_week_rating()
+        for user in list_of_topuser_today:
+            fulltext += TEXTS['человек входящий в рейтинг'].format(game_name=user.nickname,
+                                                                   rating=user.rating) + '\n\n'
+        fulltext += '\n\n'
+        week_rating = TEXTS['недельный рейтинг']
+        fulltext += week_rating + '\n'
+        for user in list_of_topuser_week:
+            fulltext += TEXTS['человек входящий в рейтинг'].format(game_name=user.nickname,
+                                                                   rating=user.rating_week) + '\n\n'
+        await call.message.answer(fulltext)

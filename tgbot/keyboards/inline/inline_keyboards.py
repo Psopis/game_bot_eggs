@@ -44,7 +44,7 @@ class Profile_kb:
         kb = InlineKeyboardBuilder()
         kb.row(InlineKeyboardButton(
             text="Играть",
-            callback_data=f'g'
+            web_app=WebAppInfo(url="https://psopis.github.io/site_game_create/")
         )
         )
         kb.row(InlineKeyboardButton(
