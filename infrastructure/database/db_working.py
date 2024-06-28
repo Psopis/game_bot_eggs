@@ -7,72 +7,62 @@ from infrastructure.database.models import User
 
 class UserWorking:
     @staticmethod
-    async def add_user(user_id, username, time):
+    async def add_user(user_id, name):
         try:
-            return await User.get(user_id=user_id)
+            return await User.get(tg_user_id=user_id)
         except tortoise.exceptions.DoesNotExist:
-            print(f"Created user {username}")
-            await User.create(user_id=user_id, username=username, role_='member',
-                              date=time + datetime.timedelta(days=30), your_promo='', activated_promo='')
+            print(f"Created user {name}")
+            await User.create(tg_user_id=user_id, tg_name=name, rating=0, game_user_id='', game_name=''
+                              )
+
+    @staticmethod
+    async def set_rating(user_id, rating):
+        user = await User.get(tg_user_id=user_id)
+        user.rating += rating
+        await user.save()
+
+    @staticmethod
+    async def check_game_name(name):
+        return await User.get_or_none(game_name=name)
+
+    @staticmethod
+    async def check_game_id(id):
+        return await User.get_or_none(game_user_id=id)
+
+    @staticmethod
+    async def set_game_name(user_id, name):
+
+        user = await User.get(tg_user_id=user_id)
+        user.game_name = name
+        await user.save()
+
+    @staticmethod
+    async def set_game_id(user_id, id):
+
+        user = await User.get(tg_user_id=user_id)
+        user.game_user_id = id
+        await user.save()
 
     @staticmethod
     async def check_user(user_id):
-        return await User.get_or_none(user_id=user_id)
+        return await User.get_or_none(tg_user_id=user_id)
 
     @staticmethod
-    async def get_id_from_name(username):
+    async def get_id_from_name(name):
 
-        user = await User.get(username=username)
+        user = await User.get(tg_name=name)
         return user.user_id
 
     @staticmethod
     async def get_name_from_id(user_id):
 
-        return await User.get_or_none(user_id=user_id)
+        return await User.get_or_none(tg_user_id=user_id)
 
     @staticmethod
     async def get_user(user_id):
-        user = await User.get(user_id=user_id)
+        user = await User.get(tg_user_id=user_id)
         return user
-
-    @staticmethod
-    async def role_update(username, role):
-
-        user = await User.get(username=username)
-        user.role_ = role
-        user.is_employee = False
-        if role == 'admin':
-            user.is_employee = True
-
-        await user.save()
-
-    @staticmethod
-    async def set_your_promo(user_id, promo):
-        user = await User.get(user_id=user_id)
-        user.your_promo = promo
-        await user.save()
-
-    @staticmethod
-    async def activate_promo(user_id, promo):
-        user = await User.get(user_id=user_id)
-        user.activated_promo = promo
-        await user.save()
 
 
 class AdminWorking:
-    @staticmethod
-    async def get_all_admins():
-        return await User.filter(is_employee=True)
-
-    @staticmethod
-    async def add_admin(user_id, username, time):
-        try:
-            return await User.get(user_id=user_id)
-        except tortoise.exceptions.DoesNotExist:
-
-            await User.create(user_id=user_id, username=username, role_='admin', profit=0, is_employee=True, date=time)
-
-    @staticmethod
-    async def check_admin(user_id):
-        user = await User.get(user_id=user_id)
-        return user.role_
+    pass

@@ -6,7 +6,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.storage.redis import RedisStorage, DefaultKeyBuilder
 
-from infrastructure.database.setup import init_db
+from infrastructure.database.setup import init_db, close_db
 from tgbot.config import load_config, Config
 from tgbot.handlers import routers_list
 
@@ -60,7 +60,7 @@ def get_storage(config):
 async def main():
     setup_logging()
 
-    config = load_config("../skbot/.env")
+    config = load_config(".env")
     storage = get_storage(config)
 
     bot = Bot(token=config.tg_bot.token)
@@ -77,4 +77,5 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except (KeyboardInterrupt, SystemExit):
+        asyncio.run(close_db())
         logging.error("Бот Выключен!")

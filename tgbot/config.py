@@ -11,7 +11,7 @@ class TgBot:
     """
 
     token: str
-    chat_id: str
+
     admin_ids: list[int]
     use_redis: bool
 
@@ -20,11 +20,11 @@ class TgBot:
         """
         Creates the TgBot object from environment variables.
         """
-        chat_id = env.str("CHAT_ID")
+
         token = env.str("BOT_TOKEN")
         admin_ids = env.list("ADMINS", subcast=int)
         use_redis = env.bool("USE_REDIS")
-        return TgBot(token=token, admin_ids=admin_ids, use_redis=use_redis, chat_id=chat_id)
+        return TgBot(token=token, admin_ids=admin_ids, use_redis=use_redis)
 
 
 @dataclass
