@@ -1,7 +1,10 @@
 from aiogram.filters.callback_data import CallbackData
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-
+from aiogram.utils.keyboard import KeyboardButton, ReplyKeyboardBuilder
+from aiogram.types import ReplyKeyboardMarkup
+from aiogram.utils.web_app import WebAppInitData, WebAppUser, WebAppChat
+from aiogram.types.web_app_info import WebAppInfo
 
 class Profile_kb:
     @staticmethod
@@ -18,7 +21,7 @@ class Profile_kb:
         )
         )
         kb.row(InlineKeyboardButton(
-            text="«Указать ID",
+            text="Указать ID",
             callback_data=f'set_ID'
         )
         )
@@ -53,3 +56,6 @@ class Profile_kb:
         )
         )
         return kb.as_markup()
+
+
+

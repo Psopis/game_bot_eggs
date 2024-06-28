@@ -16,6 +16,18 @@ class states(StatesGroup):
     set_id = State()
     set_name = State()
     set_ID = State()
+    set_ID_one_more = State()
+
+
+@user_router.message(F.contentType == ['web_app_data'])
+async def user_start(message: Message):
+    print(1212121)
+    print(message.text)
+    # if await UserWorking.check_user(message.from_user.id):
+    #     pass
+    # text = TEXTS['start_text'].format(name=message.from_user.username)
+    # await UserWorking.add_user(user_id=message.from_user.id, name=message.from_user.username)
+    # await message.answer(text, reply_markup=Profile_kb.start_keyboard())
 
 
 class User:
@@ -35,7 +47,7 @@ class User:
         await call.answer()
         user = await UserWorking.get_user(call.from_user.id)
         if user.game_user_id:
-            text = TEXTS['set_id_or_set_new_id']
+            text = TEXTS['после нажатия если нету id для призов']
             await call.message.answer(text, reply_markup=Profile_kb.set_id_keyboard())
         else:
 
@@ -44,10 +56,39 @@ class User:
             await state.set_state(states.set_id)
 
     @staticmethod
+    @user_router.callback_query(F.data == 'set_new_ID')
+    async def get_back(call: CallbackQuery, state: FSMContext):
+        text = TEXTS['Напишите id для получения призов']
+        await call.message.edit_text(text=text)
+        await state.set_state(states.set_ID_one_more)
+
+    @staticmethod
+    @user_router.message(states.set_ID_one_more)
+    async def user_set__id(message: Message, state: FSMContext):
+
+        try:
+            int(message.text)
+
+        except ValueError:
+            await message.answer(TEXTS['Неправильный тип данных у ID'])
+        else:
+            if await UserWorking.check_game_id(int(message.text)):
+                text = TEXTS['такой Id уже есть!']
+                await message.answer(text)
+                await state.set_state(states.set_ID)
+                await message.answer(TEXTS['Текст для ввода ID при запуске игры'])
+            else:
+                await UserWorking.set_game_id(user_id=message.from_user.id, id=int(message.text))
+
+                await message.answer(TEXTS['set_id_for_prize'],
+                                     reply_markup=Profile_kb.set_id_keyboard())
+                await state.clear()
+
+    @staticmethod
     @user_router.callback_query(F.data == 'get_back_from_ID')
     async def get_back(call: CallbackQuery):
         await call.answer()
-        text = TEXTS['start_text']
+        text = TEXTS['start_text'].format(name=call.from_user.username)
         await call.message.answer(text, reply_markup=Profile_kb.start_keyboard())
 
 
@@ -57,10 +98,11 @@ class StartGame:
     async def get_rating(call: CallbackQuery, state: FSMContext):
         user = await UserWorking.get_user(call.from_user.id)
         text = TEXTS['start_game']
-        await call.message.edit_text(text)
+        await call.message.edit_text(text, reply_markup=Profile_kb.start_game_and_play())
         if user.game_user_id and user.nickname:
             print(1)
-            await call.message.edit_text(text=TEXTS['Текст для запуска игры после заполнения имени и id'])
+            await call.message.answer(text=TEXTS['Текст для запуска игры после заполнения имени и id'],
+                                      reply_markup=Profile_kb.start_game_and_play())
         else:
             print(3)
 
